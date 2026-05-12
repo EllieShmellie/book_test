@@ -14,6 +14,7 @@ use app\repositories\SubscribeRepository;
 use app\services\BookService;
 use app\services\SubscribeService;
 use Codeception\Test\Unit;
+use Yii;
 
 class CatalogTest extends Unit
 {
@@ -190,6 +191,23 @@ class CatalogTest extends Unit
         $this->assertSame('Избранные рассказы', Book::findOne($book->book_id)->title);
     }
 
+    public function testBookServiceRemovesCoverWhenBookIsDeleted(): void
+    {
+        $author = $this->createAuthor('Брэдбери', 'Рэй');
+        $book = $this->createBookWithAuthors('451 градус по Фаренгейту', 1953, [$author]);
+        $book->cover = 'cover_delete_test.png';
+        $this->assertTrue($book->save(false));
+
+        $coverPath = Yii::getAlias('@covers') . '/' . $book->cover;
+        $this->writeCoverFile($coverPath);
+
+        $service = new BookService(new BookRepository(), $this->failingSubscribeService());
+        $service->delete($book->book_id);
+
+        $this->assertFalse(Book::find()->where(['book_id' => $book->book_id])->exists());
+        $this->assertFileDoesNotExist($coverPath);
+    }
+
     private function createAuthor(string $lastName, string $firstName): Author
     {
         $author = new Author([
@@ -264,5 +282,18 @@ class CatalogTest extends Unit
     private function isbn(): string
     {
         return (string) $this->isbnSequence++;
+    }
+
+    private function writeCoverFile(string $path): void
+    {
+        $dir = dirname($path);
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
+
+        file_put_contents(
+            $path,
+            base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==')
+        );
     }
 }

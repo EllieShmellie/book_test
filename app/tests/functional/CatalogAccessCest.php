@@ -50,6 +50,24 @@ class CatalogAccessCest
         $I->dontSee('Создать книгу', 'h1');
     }
 
+    public function guestCannotOpenWritePages(FunctionalTester $I): void
+    {
+        $author = $this->createAuthor();
+        $book = $this->createBookWithAuthor();
+
+        $I->amOnRoute('book/update', ['id' => $book->book_id]);
+        $I->see('Login', 'h1');
+        $I->dontSee('Изменить книгу', 'h1');
+
+        $I->amOnRoute('author/create');
+        $I->see('Login', 'h1');
+        $I->dontSee('Создать автора', 'h1');
+
+        $I->amOnRoute('author/update', ['id' => $author->author_id]);
+        $I->see('Login', 'h1');
+        $I->dontSee('Изменить автора', 'h1');
+    }
+
     public function authorizedUserCanOpenCreateBookPage(FunctionalTester $I): void
     {
         $this->createAuthor();
@@ -84,6 +102,63 @@ class CatalogAccessCest
         $I->assertNotNull($book);
         $I->assertNotEmpty($book->cover);
         $I->assertFileExists(Yii::getAlias('@covers') . '/' . $book->cover);
+    }
+
+    public function authorizedUserCanReplaceBookCover(FunctionalTester $I): void
+    {
+        $author = $this->createAuthor();
+        $book = new Book([
+            'title' => 'Книга со старой обложкой',
+            'year' => 2020,
+            'isbn' => '9781234567002',
+            'cover' => 'cover_replace_old.png',
+        ]);
+        $book->save(false);
+        (new AuthorBook([
+            'author_id' => $author->author_id,
+            'book_id' => $book->book_id,
+        ]))->save(false);
+
+        $oldCoverPath = Yii::getAlias('@covers') . '/' . $book->cover;
+        $this->writeTestCoverFile($oldCoverPath);
+        $this->ensureTestCoverFile();
+
+        $I->amLoggedInAs($this->createUser());
+        $I->amOnRoute('book/update', ['id' => $book->book_id]);
+        $I->fillField('Book[title]', 'Книга с новой обложкой');
+        $I->fillField('Book[year]', '2021');
+        $I->fillField('Book[description]', 'Описание');
+        $I->fillField('Book[isbn]', '9781234567002');
+        $I->attachFile('//input[@type="file" and @name="Book[cover_file]"]', 'cover.png');
+        $I->checkOption("//input[@name='Book[author_ids][]' and @value='{$author->author_id}']");
+        $I->click('Изменить');
+
+        $I->see('Книга с новой обложкой', 'h1');
+
+        $book->refresh();
+        $I->assertNotSame('cover_replace_old.png', $book->cover);
+        $I->assertFileDoesNotExist($oldCoverPath);
+        $I->assertFileExists(Yii::getAlias('@covers') . '/' . $book->cover);
+    }
+
+    public function authorizedUserCanCreateAndUpdateAuthor(FunctionalTester $I): void
+    {
+        $I->amLoggedInAs($this->createUser());
+        $I->amOnRoute('author/create');
+        $I->fillField('Author[last_name]', 'Лавлейс');
+        $I->fillField('Author[first_name]', 'Ада');
+        $I->click('Создать');
+
+        $I->see('Ада Лавлейс', 'h1');
+
+        $author = Author::findOne(['last_name' => 'Лавлейс', 'first_name' => 'Ада']);
+        $I->assertNotNull($author);
+
+        $I->amOnRoute('author/update', ['id' => $author->author_id]);
+        $I->fillField('Author[last_name]', 'Байрон');
+        $I->click('Изменить');
+
+        $I->see('Ада Байрон', 'h1');
     }
 
     public function guestCanSubscribeToAuthor(FunctionalTester $I): void
@@ -128,7 +203,7 @@ class CatalogAccessCest
         $I->seeResponseCodeIs(400);
     }
 
-    private function createBookWithAuthor(): void
+    private function createBookWithAuthor(): Book
     {
         $author = $this->createAuthor();
         $book = new Book([
@@ -142,6 +217,8 @@ class CatalogAccessCest
             'author_id' => $author->author_id,
             'book_id' => $book->book_id,
         ]))->save(false);
+
+        return $book;
     }
 
     private function createAuthor(): Author
@@ -160,6 +237,16 @@ class CatalogAccessCest
         $coverPath = codecept_data_dir('cover.png');
         if (is_file($coverPath)) {
             return;
+        }
+
+        $this->writeTestCoverFile($coverPath);
+    }
+
+    private function writeTestCoverFile(string $coverPath): void
+    {
+        $dir = dirname($coverPath);
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
         }
 
         file_put_contents(

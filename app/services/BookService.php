@@ -20,9 +20,10 @@ class BookService
     {
         $transaction = Yii::$app->db->beginTransaction();
         $authorsToNotify = [];
+        $uploadedCover = null;
 
         try {
-            $this->uploadCoverFile($model);
+            $uploadedCover = $this->uploadCoverFile($model);
 
             if (!$model->save(false)) {
                 throw new Exception('Ошибка при создании книги: ' . implode(', ', $model->getFirstErrors()));
@@ -33,6 +34,7 @@ class BookService
             $transaction->commit();
         } catch (\Exception $e) {
             $transaction->rollBack();
+            $this->deleteCoverFile($uploadedCover);
             throw $e;
         }
 
@@ -42,8 +44,11 @@ class BookService
     public function update(Book $model): void
     {
         $transaction = Yii::$app->db->beginTransaction();
+        $oldCover = $model->cover;
+        $uploadedCover = null;
+
         try {
-            $this->uploadCoverFile($model);
+            $uploadedCover = $this->uploadCoverFile($model);
 
             if (!$model->save(false)) {
                 throw new Exception('Ошибка при обновлении книги: ' . implode(', ', $model->getFirstErrors()));
@@ -54,16 +59,24 @@ class BookService
             $transaction->commit();
         } catch (\Exception $e) {
             $transaction->rollBack();
+            $this->deleteCoverFile($uploadedCover);
             throw $e;
+        }
+
+        if ($uploadedCover !== null && $oldCover !== $uploadedCover) {
+            $this->deleteCoverFile($oldCover);
         }
     }
 
     public function delete($id): void
     {
         $model = $this->repository->findById($id);
+        $cover = $model->cover;
         if (!$model->delete()) {
             throw new Exception('Ошибка при удалении книги.');
         }
+
+        $this->deleteCoverFile($cover);
     }
 
     public function findModel($id): Book
@@ -75,7 +88,7 @@ class BookService
      * @param Book $model
      * @throws Exception
      */
-    private function uploadCoverFile(Book $model): void
+    private function uploadCoverFile(Book $model): ?string
     {
         $model->cover_file = UploadedFile::getInstance($model, 'cover_file');
         if ($model->cover_file) {
@@ -94,7 +107,11 @@ class BookService
                 throw new Exception('Ошибка при загрузке обложки.');
             }
             $model->cover = $fileName;
+
+            return $fileName;
         }
+
+        return null;
     }
 
     private function uploadErrorMessage(int $error): string
@@ -108,6 +125,18 @@ class BookService
             UPLOAD_ERR_EXTENSION => 'Загрузка обложки остановлена расширением PHP.',
             default => 'Ошибка при загрузке обложки.',
         };
+    }
+
+    private function deleteCoverFile(?string $fileName): void
+    {
+        if ($fileName === null || $fileName === '') {
+            return;
+        }
+
+        $path = Yii::getAlias('@covers') . '/' . basename($fileName);
+        if (is_file($path)) {
+            @unlink($path);
+        }
     }
 
     protected function saveAuthorBooks(Book $model): array
