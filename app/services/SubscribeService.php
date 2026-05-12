@@ -4,15 +4,15 @@ namespace app\services;
 
 use app\components\SmsSenderInterface;
 use app\repositories\SubscribeRepository;
-use Yii;
 use app\models\Subscriber;
 use app\models\Book;
+use Yii;
 
 class SubscribeService
 {
     public function __construct(
         private SubscribeRepository $repository,
-        private ?SmsSenderInterface $smsSender = null,
+        private SmsSenderInterface $smsSender,
     )
     {
     }
@@ -55,11 +55,6 @@ class SubscribeService
             ];
         }
 
-        $this->smsSender()->sendBatch($messages);
-    }
-
-    private function smsSender(): SmsSenderInterface
-    {
-        return $this->smsSender ?? Yii::$app->smsPilot;
+        $this->smsSender->sendBatch($messages);
     }
 }

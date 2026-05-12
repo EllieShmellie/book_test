@@ -61,6 +61,33 @@ class CatalogAccessCest
         ]);
     }
 
+    public function guestSeesReportFormWithoutDefaultYear(FunctionalTester $I): void
+    {
+        $I->amOnRoute('author/report');
+
+        $I->see('Топ-10 авторов по году издания', 'h1');
+        $I->see('Выберите год издания, чтобы построить отчет.');
+        $I->dontSee('За выбранный год данных нет.');
+    }
+
+    public function guestCanBuildReportForPublicationYear(FunctionalTester $I): void
+    {
+        $this->createBookWithAuthor();
+
+        $I->amOnRoute('author/report', ['year' => 2026]);
+
+        $I->see('Топ-10 авторов за 2026 год', 'h1');
+        $I->see('Иванов');
+        $I->see('1', 'td');
+    }
+
+    public function guestCannotBuildReportWithInvalidYear(FunctionalTester $I): void
+    {
+        $I->amOnRoute('author/report', ['year' => 'abc']);
+
+        $I->seeResponseCodeIs(400);
+    }
+
     private function createBookWithAuthor(): void
     {
         $author = $this->createAuthor();

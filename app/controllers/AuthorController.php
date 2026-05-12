@@ -7,6 +7,7 @@ use Yii;
 use app\models\Author;
 use app\models\Subscriber;
 use app\services\AuthorService;
+use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
@@ -168,13 +169,32 @@ class AuthorController extends Controller
 
     public function actionReport($year = null): string
     {
-        $year = (int) ($year ?: date('Y'));
-
-        $authors = $this->service->getTopAuthors($year, self::REPORT_LIMIT);
+        $year = $this->normalizeReportYear($year);
+        $authors = $year === null
+            ? []
+            : $this->service->getTopAuthors($year, self::REPORT_LIMIT);
 
         return $this->render('report', [
             'authors' => $authors,
             'year'    => $year,
         ]);
+    }
+
+    private function normalizeReportYear($year): ?int
+    {
+        if ($year === null || $year === '') {
+            return null;
+        }
+
+        if (!ctype_digit((string) $year)) {
+            throw new BadRequestHttpException('Год издания должен быть положительным числом.');
+        }
+
+        $year = (int) $year;
+        if ($year < 1 || $year > 9999) {
+            throw new BadRequestHttpException('Год издания должен быть в диапазоне от 1 до 9999.');
+        }
+
+        return $year;
     }
 }

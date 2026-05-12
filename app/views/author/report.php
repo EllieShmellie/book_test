@@ -3,9 +3,11 @@
 use yii\helpers\Html;
 
 /** @var app\models\Author[] $authors */
-/** @var int|string $year */
+/** @var int|null $year */
 
-$this->title = "Топ-10 авторов за {$year} год";
+$this->title = $year === null
+    ? 'Топ-10 авторов по году издания'
+    : "Топ-10 авторов за {$year} год";
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
@@ -26,7 +28,9 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
 <?= Html::endForm() ?>
 
-<?php if (empty($authors)): ?>
+<?php if ($year === null): ?>
+    <p class="text-muted">Выберите год издания, чтобы построить отчет.</p>
+<?php elseif (empty($authors)): ?>
     <p class="text-muted">За выбранный год данных нет.</p>
 <?php else: ?>
     <table class="table table-striped">

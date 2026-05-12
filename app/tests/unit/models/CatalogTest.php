@@ -235,7 +235,7 @@ class CatalogTest extends Unit
 
     private function failingSubscribeService(): SubscribeService
     {
-        return new class(new SubscribeRepository()) extends SubscribeService {
+        return new class(new SubscribeRepository(), $this->recordingSmsSender()) extends SubscribeService {
             public int $notifyCalls = 0;
 
             public function notify(array $ids, Book $book): void

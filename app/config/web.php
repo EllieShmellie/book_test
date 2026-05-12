@@ -53,6 +53,11 @@ $config = [
             ],
         ],
     ],
+    'container' => [
+        'definitions' => [
+            \app\components\SmsSenderInterface::class => static fn () => \Yii::$app->smsPilot,
+        ],
+    ],
     'params' => $params,
 ];
 

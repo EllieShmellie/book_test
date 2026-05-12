@@ -42,5 +42,15 @@ return [
             */
         ],
     ],
+    'container' => [
+        'definitions' => [
+            \app\components\SmsSenderInterface::class => static fn () => new class implements \app\components\SmsSenderInterface {
+                public function sendBatch(array $messages, array $additionalParams = []): ?array
+                {
+                    return null;
+                }
+            },
+        ],
+    ],
     'params' => $params,
 ];
