@@ -31,7 +31,7 @@ class AuthorRepository
             ->alias('a')
             ->select(['a.*', 'COUNT(b.book_id) AS booksCount'])
             ->joinWith(['books b'])
-            ->andWhere(['YEAR(b.created_at)' => $year])
+            ->andWhere(['b.year' => $year])
             ->groupBy('a.author_id')
             ->orderBy(['booksCount' => SORT_DESC])
             ->limit($limit)
@@ -45,5 +45,4 @@ class AuthorRepository
     {
         return Author::find()->all();
     }
-    
 }

@@ -24,7 +24,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <tr>
                 <td><?= $index + 1 ?></td>
                 <td><?= Html::encode($author->first_name . ' ' . $author->last_name) ?></td>
-                <td><?= count($author->books) ?></td>
+                <td><?= (int) $author->booksCount ?></td>
             </tr>
         <?php endforeach; ?>
     </tbody>

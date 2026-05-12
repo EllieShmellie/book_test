@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace app\models;
 
@@ -15,17 +15,19 @@ use yii\db\Expression;
  * @property string $created_at
  * @property string $updated_at
  * @property int[]  $book_ids
- * 
+ *
  * @property AuthorBook[] $authorBooks
  * @property Book[] $books
  */
 class Author extends ActiveRecord
 {
+    public int $booksCount = 0;
 
     /**
      * @var int[]
      */
     public $book_ids = [];
+
     /**
      * @inheritDoc
      */
@@ -59,10 +61,10 @@ class Author extends ActiveRecord
             [['last_name', 'first_name', 'patronymic'], 'string', 'max' => 255],
             [['created_at', 'updated_at'], 'safe'],
             ['book_ids', 'each', 'rule' => [
-                'exist', 
-                'skipOnError' => true, 
-                'targetClass' => Book::class, 
-                'targetAttribute' => 'book_id'
+                'exist',
+                'skipOnError' => true,
+                'targetClass' => Book::class,
+                'targetAttribute' => 'book_id',
             ]],
         ];
     }
@@ -73,8 +75,8 @@ class Author extends ActiveRecord
     public function attributeLabels(): array
     {
         return [
-            'author_id' => 'ID Автора', 
-            'last_name' => 'Фамилия',
+            'author_id'  => 'ID Автора',
+            'last_name'  => 'Фамилия',
             'first_name' => 'Имя',
             'patronymic' => 'Отчество',
             'updated_at' => 'Обновлен',
