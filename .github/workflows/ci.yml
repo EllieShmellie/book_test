@@ -73,3 +73,37 @@ jobs:
       - name: Run tests
         working-directory: app
         run: vendor/bin/codecept run unit,functional
+
+      - name: Smoke Docker web stack
+        run: |
+          set -euo pipefail
+          trap 'docker compose down -v --remove-orphans' EXIT
+
+          mkdir -p app/runtime app/web/assets
+          chmod -R 777 app/runtime app/web/assets
+
+          WEB_PORT=8081 docker compose up -d --build db app web
+
+          migrated=0
+          for attempt in {1..30}; do
+            if docker compose exec -T app php yii migrate --interactive=0; then
+              migrated=1
+              break
+            fi
+            sleep 2
+          done
+
+          if [ "$migrated" -ne 1 ]; then
+            docker compose logs
+            exit 1
+          fi
+
+          for attempt in {1..30}; do
+            if curl -fsS http://127.0.0.1:8081/author/index | grep -q 'Авторы'; then
+              exit 0
+            fi
+            sleep 2
+          done
+
+          docker compose logs
+          exit 1

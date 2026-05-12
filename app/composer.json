@@ -8,7 +8,7 @@
     "support": {
         "source": "https://github.com/EllieShmellie/book_test"
     },
-    "minimum-stability": "dev",
+    "prefer-stable": true,
     "require": {
         "php": ">=8.0.0",
         "yiisoft/yii2": "~2.0.45",
@@ -30,6 +30,9 @@
     "config": {
         "allow-plugins": {
             "yiisoft/yii2-composer" : true
+        },
+        "platform": {
+            "php": "8.0.30"
         },
         "process-timeout": 1800,
         "fxp-asset": {

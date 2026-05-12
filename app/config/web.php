@@ -5,7 +5,7 @@ $db = require __DIR__ . '/db.php';
 
 $config = [
     'id' => 'basic',
-    'name' => 'Silly project',
+    'name' => 'Book Catalog',
     'homeUrl' => '/author/index',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
