@@ -38,5 +38,8 @@ runtime/
 # web assets (скомпилированные ресурсы)
 web/assets/
 
+# uploaded book covers
+web/images/covers/cover_*
+
 # файл переменных окружения, если используется
 .env

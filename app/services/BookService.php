@@ -79,6 +79,11 @@ class BookService
     {
         $model->cover_file = UploadedFile::getInstance($model, 'cover_file');
         if ($model->cover_file) {
+            $uploadError = (int) $model->cover_file->error;
+            if ($uploadError !== UPLOAD_ERR_OK) {
+                throw new Exception($this->uploadErrorMessage($uploadError));
+            }
+
             $fileName = uniqid('cover_') . '.' . $model->cover_file->extension;
             $dir = Yii::getAlias('@covers');
             $filePath = $dir . '/' . $fileName;
@@ -90,6 +95,19 @@ class BookService
             }
             $model->cover = $fileName;
         }
+    }
+
+    private function uploadErrorMessage(int $error): string
+    {
+        return match ($error) {
+            UPLOAD_ERR_INI_SIZE,
+            UPLOAD_ERR_FORM_SIZE => 'Размер обложки превышает допустимый лимит.',
+            UPLOAD_ERR_PARTIAL => 'Файл обложки был загружен не полностью.',
+            UPLOAD_ERR_NO_TMP_DIR => 'Временная директория для загрузки файлов недоступна.',
+            UPLOAD_ERR_CANT_WRITE => 'Не удалось записать файл обложки на диск.',
+            UPLOAD_ERR_EXTENSION => 'Загрузка обложки остановлена расширением PHP.',
+            default => 'Ошибка при загрузке обложки.',
+        };
     }
 
     protected function saveAuthorBooks(Book $model): array

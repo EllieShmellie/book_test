@@ -69,7 +69,7 @@ class Book extends ActiveRecord
                 'targetClass' => Author::class,
                 'targetAttribute' => 'author_id',
             ]],
-            [['cover_file'], 'file', 'extensions' => 'png, jpg, jpeg', 'skipOnEmpty' => true],
+            [['cover_file'], 'file', 'extensions' => 'png, jpg, jpeg', 'maxSize' => 20 * 1024 * 1024, 'skipOnEmpty' => true],
         ];
     }
 
