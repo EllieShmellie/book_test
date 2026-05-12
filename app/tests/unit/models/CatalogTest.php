@@ -159,8 +159,10 @@ class CatalogTest extends Unit
     public function testBookServiceCreatesRelationsAndKeepsBookWhenNotificationFails(): void
     {
         $author = $this->createAuthor('Гоголь', 'Николай');
+        $eventCalls = 0;
+        $eventAuthorIds = [];
 
-        $this->attachFailingEventHandler();
+        $this->attachFailingEventHandler($eventCalls, $eventAuthorIds);
 
         $service = new BookService(new BookRepository(), new AuthorBookRepository());
 
@@ -174,6 +176,8 @@ class CatalogTest extends Unit
         $service->create($book);
 
         $this->assertNotNull($book->book_id);
+        $this->assertSame(1, $eventCalls);
+        $this->assertSame([$author->author_id], $eventAuthorIds);
         $this->assertTrue(Book::find()->where(['book_id' => $book->book_id])->exists());
         $this->assertTrue(AuthorBook::find()->where([
             'book_id' => $book->book_id,
@@ -185,8 +189,10 @@ class CatalogTest extends Unit
     {
         $author = $this->createAuthor('Чехов', 'Антон');
         $book = $this->createBookWithAuthors('Рассказы', 1899, [$author]);
+        $eventCalls = 0;
+        $eventAuthorIds = [];
 
-        $this->attachFailingEventHandler();
+        $this->attachFailingEventHandler($eventCalls, $eventAuthorIds);
 
         $service = new BookService(new BookRepository(), new AuthorBookRepository());
 
@@ -195,6 +201,8 @@ class CatalogTest extends Unit
 
         $service->update($book);
 
+        $this->assertSame(0, $eventCalls);
+        $this->assertSame([], $eventAuthorIds);
         $this->assertSame('Избранные рассказы', Book::findOne($book->book_id)->title);
     }
 
@@ -258,12 +266,15 @@ class CatalogTest extends Unit
         return $book;
     }
 
-    private function attachFailingEventHandler(): void
+    private function attachFailingEventHandler(int &$eventCalls, array &$eventAuthorIds): void
     {
         Event::on(
             Book::class,
             Book::EVENT_AFTER_CREATE,
-            function () {
+            function (BookEvent $event) use (&$eventCalls, &$eventAuthorIds) {
+                $eventCalls++;
+                $eventAuthorIds = $event->authorIds;
+
                 throw new \RuntimeException('SMS provider is unavailable.');
             },
         );

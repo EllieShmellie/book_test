@@ -85,7 +85,7 @@ class BookController extends Controller
                 return $this->redirect(['view', 'id' => $model->book_id]);
             } catch (\Exception $e) {
                 Yii::error($e->getMessage(), __METHOD__);
-                Yii::$app->session->setFlash('error', 'Произошла ошибка при сохранении книги.');
+                Yii::$app->session->setFlash('error', $e->getMessage());
             }
         }
         
@@ -106,7 +106,7 @@ class BookController extends Controller
                 return $this->redirect(['view', 'id' => $model->book_id]);
             } catch (\Exception $e) {
                 Yii::error($e->getMessage(), __METHOD__);
-                Yii::$app->session->setFlash('error', 'Произошла ошибка при обновлении книги.');
+                Yii::$app->session->setFlash('error', $e->getMessage());
             }
         }
         
