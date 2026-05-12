@@ -10,11 +10,23 @@ class CatalogAccessCest
 {
     public function _before(FunctionalTester $I): void
     {
+        foreach (glob(Yii::getAlias('@covers') . '/cover_*') ?: [] as $coverFile) {
+            unlink($coverFile);
+        }
+
         AuthorBook::deleteAll();
         Subscriber::deleteAll();
         Book::deleteAll();
         Author::deleteAll();
         User::deleteAll();
+    }
+
+    public function _after(FunctionalTester $I): void
+    {
+        $coverPath = codecept_data_dir('cover.png');
+        if (is_file($coverPath)) {
+            unlink($coverPath);
+        }
     }
 
     public function guestCanViewCatalog(FunctionalTester $I): void
@@ -40,10 +52,38 @@ class CatalogAccessCest
 
     public function authorizedUserCanOpenCreateBookPage(FunctionalTester $I): void
     {
+        $this->createAuthor();
+
         $I->amLoggedInAs($this->createUser());
         $I->amOnRoute('book/create');
 
         $I->see('Создать книгу', 'h1');
+        $I->see('Год', 'label');
+        $I->seeElement('#book-author_ids-search');
+        $I->see('Иванов Иван');
+    }
+
+    public function authorizedUserCanCreateBookWithCover(FunctionalTester $I): void
+    {
+        $author = $this->createAuthor();
+        $this->ensureTestCoverFile();
+
+        $I->amLoggedInAs($this->createUser());
+        $I->amOnRoute('book/create');
+        $I->fillField('Book[title]', 'Книга с обложкой');
+        $I->fillField('Book[year]', '2026');
+        $I->fillField('Book[description]', 'Описание');
+        $I->fillField('Book[isbn]', '9781234567897');
+        $I->attachFile('//input[@type="file" and @name="Book[cover_file]"]', 'cover.png');
+        $I->checkOption("//input[@name='Book[author_ids][]' and @value='{$author->author_id}']");
+        $I->click('Создать');
+
+        $I->see('Книга с обложкой', 'h1');
+
+        $book = Book::findOne(['isbn' => '9781234567897']);
+        $I->assertNotNull($book);
+        $I->assertNotEmpty($book->cover);
+        $I->assertFileExists(Yii::getAlias('@covers') . '/' . $book->cover);
     }
 
     public function guestCanSubscribeToAuthor(FunctionalTester $I): void
@@ -113,6 +153,19 @@ class CatalogAccessCest
         $author->save(false);
 
         return $author;
+    }
+
+    private function ensureTestCoverFile(): void
+    {
+        $coverPath = codecept_data_dir('cover.png');
+        if (is_file($coverPath)) {
+            return;
+        }
+
+        file_put_contents(
+            $coverPath,
+            base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==')
+        );
     }
 
     private function createUser(): User

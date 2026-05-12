@@ -80,7 +80,7 @@ class Book extends ActiveRecord
     {
         return [
             'book_id'     => 'ID Книги',
-            'year'        => 'год',
+            'year'        => 'Год',
             'title'       => 'Название',
             'description' => 'Описание',
             'isbn'        => 'ISBN',

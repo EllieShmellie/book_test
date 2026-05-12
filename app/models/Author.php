@@ -89,7 +89,11 @@ class Author extends ActiveRecord
      */
     public function getFullName(): string
     {
-        return "{$this->last_name} {$this->first_name} {$this->patronymic}";
+        return trim(implode(' ', array_filter([
+            $this->last_name,
+            $this->first_name,
+            $this->patronymic,
+        ])));
     }
 
     /**

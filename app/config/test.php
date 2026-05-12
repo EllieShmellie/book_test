@@ -11,6 +11,8 @@ return [
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
+        '@covers' => '@app/runtime/test-covers',
+        '@coversUrl' => '/images/covers',
     ],
     'language' => 'en-US',
     'components' => [

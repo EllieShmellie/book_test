@@ -7,6 +7,7 @@ use app\models\Book;
 use app\repositories\BookRepository;
 use yii\db\Exception;
 use app\models\AuthorBook;
+use yii\helpers\FileHelper;
 use yii\web\UploadedFile;
 
 class BookService
@@ -81,10 +82,10 @@ class BookService
             $fileName = uniqid('cover_') . '.' . $model->cover_file->extension;
             $dir = Yii::getAlias('@covers');
             $filePath = $dir . '/' . $fileName;
-            if (!is_dir($dir)) {
-                mkdir($dir, 0777, true);
+            if (!FileHelper::createDirectory($dir) || !is_writable($dir)) {
+                throw new Exception('Директория для обложек недоступна для записи.');
             }
-            if (!$model->cover_file->saveAs($filePath)) {
+            if (!$model->cover_file->saveAs($filePath, false)) {
                 throw new Exception('Ошибка при загрузке обложки.');
             }
             $model->cover = $fileName;
