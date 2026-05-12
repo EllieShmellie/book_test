@@ -57,6 +57,9 @@ $config = [
     'container' => [
         'definitions' => [
             \app\components\SmsSenderInterface::class => static fn () => \Yii::$app->smsPilot,
+            \app\repositories\AuthorRepositoryInterface::class => \app\repositories\AuthorRepository::class,
+            \app\repositories\BookRepositoryInterface::class => \app\repositories\BookRepository::class,
+            \app\repositories\SubscribeRepositoryInterface::class => \app\repositories\SubscribeRepository::class,
         ],
     ],
     'params' => $params,

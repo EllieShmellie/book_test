@@ -4,7 +4,7 @@ namespace app\repositories;
 
 use app\models\Book;
 use yii\web\NotFoundHttpException;
-class BookRepository
+class BookRepository implements BookRepositoryInterface
 {
 
     /**

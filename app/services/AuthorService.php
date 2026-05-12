@@ -3,12 +3,12 @@
 namespace app\services;
 
 use app\models\Author;
-use app\repositories\AuthorRepository;
+use app\repositories\AuthorRepositoryInterface;
 use yii\db\Exception;
 
 class AuthorService
 {
-    public function __construct(private AuthorRepository $repository)
+    public function __construct(private AuthorRepositoryInterface $repository)
     {
     }
 

@@ -52,6 +52,9 @@ return [
                     return null;
                 }
             },
+            \app\repositories\AuthorRepositoryInterface::class => \app\repositories\AuthorRepository::class,
+            \app\repositories\BookRepositoryInterface::class => \app\repositories\BookRepository::class,
+            \app\repositories\SubscribeRepositoryInterface::class => \app\repositories\SubscribeRepository::class,
         ],
     ],
     'params' => $params,

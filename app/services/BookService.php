@@ -4,7 +4,7 @@ namespace app\services;
 
 use Yii;
 use app\models\Book;
-use app\repositories\BookRepository;
+use app\repositories\BookRepositoryInterface;
 use app\repositories\AuthorBookRepository;
 use app\events\BookEvent;
 use yii\db\Exception;
@@ -14,7 +14,7 @@ use yii\web\UploadedFile;
 class BookService
 {
     public function __construct(
-        private BookRepository $repository,
+        private BookRepositoryInterface $repository,
         private AuthorBookRepository $authorBookRepository,
     ) {
     }

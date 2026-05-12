@@ -5,7 +5,7 @@ namespace app\repositories;
 use app\models\Author;
 use yii\web\NotFoundHttpException;
 
-class AuthorRepository
+class AuthorRepository implements AuthorRepositoryInterface
 {
     public function findById(int $id): Author
     {

@@ -3,7 +3,7 @@
 namespace app\services;
 
 use app\components\SmsSenderInterface;
-use app\repositories\SubscribeRepository;
+use app\repositories\SubscribeRepositoryInterface;
 use app\models\Subscriber;
 use app\models\Book;
 use app\events\BookEvent;
@@ -12,7 +12,7 @@ use Yii;
 class SubscribeService
 {
     public function __construct(
-        private SubscribeRepository $repository,
+        private SubscribeRepositoryInterface $repository,
         private SmsSenderInterface $smsSender,
     )
     {

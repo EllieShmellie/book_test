@@ -4,7 +4,7 @@ namespace app\repositories;
 
 use app\models\Subscriber;
 
-class SubscribeRepository
+class SubscribeRepository implements SubscribeRepositoryInterface
 {
     /**
      * @param string $phone
