@@ -46,7 +46,7 @@ class CatalogAccessCest
     {
         $I->amOnRoute('book/create');
 
-        $I->see('Login', 'h1');
+        $I->see('Вход', 'h1');
         $I->dontSee('Создать книгу', 'h1');
     }
 
@@ -56,15 +56,15 @@ class CatalogAccessCest
         $book = $this->createBookWithAuthor();
 
         $I->amOnRoute('book/update', ['id' => $book->book_id]);
-        $I->see('Login', 'h1');
+        $I->see('Вход', 'h1');
         $I->dontSee('Изменить книгу', 'h1');
 
         $I->amOnRoute('author/create');
-        $I->see('Login', 'h1');
+        $I->see('Вход', 'h1');
         $I->dontSee('Создать автора', 'h1');
 
         $I->amOnRoute('author/update', ['id' => $author->author_id]);
-        $I->see('Login', 'h1');
+        $I->see('Вход', 'h1');
         $I->dontSee('Изменить автора', 'h1');
     }
 

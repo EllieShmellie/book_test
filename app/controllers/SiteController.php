@@ -13,6 +13,8 @@ use yii\web\Response;
 
 class SiteController extends Controller
 {
+    private const REMEMBER_ME_DURATION = 30 * 24 * 3600;
+
     /**
      * @param string $id
      * @param \yii\base\Module $module
@@ -98,7 +100,7 @@ class SiteController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             try {
                 $user = $this->userService->login($model->phone, $model->password);
-                Yii::$app->user->login($user, $model->rememberMe ? 3600 * 24 * 30 : 0);
+                Yii::$app->user->login($user, $model->rememberMe ? self::REMEMBER_ME_DURATION : 0);
                 return $this->goBack();
             } catch (\Exception $e) {
                 Yii::error($e->getMessage(), __METHOD__);

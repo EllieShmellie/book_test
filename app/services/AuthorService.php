@@ -5,7 +5,6 @@ namespace app\services;
 use app\models\Author;
 use app\repositories\AuthorRepository;
 use yii\db\Exception;
-use yii\web\NotFoundHttpException;
 
 class AuthorService
 {
@@ -13,18 +12,21 @@ class AuthorService
     {
     }
 
-    public function create(Author $model): void
+    public function save(Author $model): void
     {
         if (!$model->save()) {
-            throw new Exception('Ошибка при создании автора: ' . implode(', ', $model->getFirstErrors()));
+            throw new Exception('Ошибка при сохранении автора: ' . implode(', ', $model->getFirstErrors()));
         }
+    }
+
+    public function create(Author $model): void
+    {
+        $this->save($model);
     }
 
     public function update(Author $model): void
     {
-        if (!$model->save()) {
-            throw new Exception('Ошибка при обновлении автора: ' . implode(', ', $model->getFirstErrors()));
-        }
+        $this->save($model);
     }
 
     public function delete(int $id): void
@@ -41,10 +43,7 @@ class AuthorService
      */
     public function findModel(int $id): Author
     {
-        if (($model = $this->repository->findById($id)) !== null) {
-            return $model;
-        }
-        throw new NotFoundHttpException('Запрошенный автор не найден.');
+        return $this->repository->findById($id);
     }
 
     /**

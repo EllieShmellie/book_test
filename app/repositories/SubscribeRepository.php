@@ -34,7 +34,7 @@ class SubscribeRepository
     }
 
     /**
-     * @param int[] $author_id
+     * @param int[] $authorIds
      * @return array|Subscriber[]
      */
     public function findSubscribersByAuthors(array $authorIds): array

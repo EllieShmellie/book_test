@@ -146,7 +146,7 @@ class BookService
             ->where(['book_id' => $model->book_id])
             ->column();
 
-        $newAuthorIds = is_array($model->author_ids) ? $model->author_ids : [];
+        $newAuthorIds = $model->author_ids;
 
         $authorsToAdd    = array_diff($newAuthorIds, $currentAuthorIds);
         $authorsToRemove = array_diff($currentAuthorIds, $newAuthorIds);

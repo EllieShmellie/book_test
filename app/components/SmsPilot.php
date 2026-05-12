@@ -63,7 +63,7 @@ class SmsPilot extends Component implements SmsSenderInterface
     /**
      * @param mixed $phones
      * @param string $message
-     * @return array{text: string, to: mixed[]}
+     * @return array<array{to: mixed, text: string}>
      */
     private function prepareMessages($phones, string $message): array
     {
@@ -99,7 +99,7 @@ class SmsPilot extends Component implements SmsSenderInterface
     {
         try {
             $jsonBody = Json::encode($postData);
-        } catch (\InvalidArgumentException $e) {
+        } catch (\Throwable $e) {
             throw new HttpException(500, 'JSON encode: ' . $e->getMessage());
         }
 
@@ -133,7 +133,7 @@ class SmsPilot extends Component implements SmsSenderInterface
 
         try {
             $result = Json::decode($response);
-        } catch (\InvalidArgumentException $e) {
+        } catch (\Throwable $e) {
             throw new HttpException(500, 'Неверный JSON: ' . $e->getMessage());
         }
 

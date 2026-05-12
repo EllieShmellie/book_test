@@ -9,7 +9,6 @@ use app\models\Subscriber;
 use app\services\AuthorService;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
-use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
@@ -131,10 +130,7 @@ class AuthorController extends Controller
 
     protected function findModel(int $id): Author
     {
-        if (($model = $this->service->findModel($id)) !== null) {
-            return $model;
-        }
-        throw new NotFoundHttpException('Запрошенный автор не найден.');
+        return $this->service->findModel($id);
     }
 
     public function actionSubscribe(int $id)

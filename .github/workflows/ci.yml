@@ -58,6 +58,10 @@ jobs:
             -name '*.php' -print0 \
             | xargs -0 -n1 php -l
 
+      - name: Static analysis (PHPStan)
+        working-directory: app
+        run: php -d memory_limit=512M vendor/bin/phpstan analyse --no-progress
+
       - name: Validate Docker Compose config
         working-directory: .
         run: docker compose config
