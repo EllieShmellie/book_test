@@ -25,6 +25,8 @@ use yii\web\UploadedFile;
  */
 class Book extends ActiveRecord
 {
+    public const EVENT_AFTER_CREATE = 'afterCreate';
+
     /**
      * @var int[]
      */

@@ -3,11 +3,13 @@
 namespace tests\unit\models;
 
 use app\components\SmsSenderInterface;
+use app\events\BookEvent;
 use app\models\Author;
 use app\models\AuthorBook;
 use app\models\Book;
 use app\models\Subscriber;
 use app\models\User;
+use app\repositories\AuthorBookRepository;
 use app\repositories\AuthorRepository;
 use app\repositories\BookRepository;
 use app\repositories\SubscribeRepository;
@@ -15,6 +17,7 @@ use app\services\BookService;
 use app\services\SubscribeService;
 use Codeception\Test\Unit;
 use Yii;
+use yii\base\Event;
 
 class CatalogTest extends Unit
 {
@@ -22,6 +25,8 @@ class CatalogTest extends Unit
 
     protected function _before(): void
     {
+        Event::off(Book::class, Book::EVENT_AFTER_CREATE);
+
         AuthorBook::deleteAll();
         Subscriber::deleteAll();
         Book::deleteAll();
@@ -154,8 +159,10 @@ class CatalogTest extends Unit
     public function testBookServiceCreatesRelationsAndKeepsBookWhenNotificationFails(): void
     {
         $author = $this->createAuthor('Гоголь', 'Николай');
-        $notifier = $this->failingSubscribeService();
-        $service = new BookService(new BookRepository(), $notifier);
+
+        $this->attachFailingEventHandler();
+
+        $service = new BookService(new BookRepository(), new AuthorBookRepository());
 
         $book = new Book([
             'title' => 'Мертвые души',
@@ -167,7 +174,6 @@ class CatalogTest extends Unit
         $service->create($book);
 
         $this->assertNotNull($book->book_id);
-        $this->assertSame(1, $notifier->notifyCalls);
         $this->assertTrue(Book::find()->where(['book_id' => $book->book_id])->exists());
         $this->assertTrue(AuthorBook::find()->where([
             'book_id' => $book->book_id,
@@ -179,15 +185,16 @@ class CatalogTest extends Unit
     {
         $author = $this->createAuthor('Чехов', 'Антон');
         $book = $this->createBookWithAuthors('Рассказы', 1899, [$author]);
-        $notifier = $this->failingSubscribeService();
-        $service = new BookService(new BookRepository(), $notifier);
+
+        $this->attachFailingEventHandler();
+
+        $service = new BookService(new BookRepository(), new AuthorBookRepository());
 
         $book->title = 'Избранные рассказы';
         $book->author_ids = [$author->author_id];
 
         $service->update($book);
 
-        $this->assertSame(0, $notifier->notifyCalls);
         $this->assertSame('Избранные рассказы', Book::findOne($book->book_id)->title);
     }
 
@@ -201,7 +208,7 @@ class CatalogTest extends Unit
         $coverPath = Yii::getAlias('@covers') . '/' . $book->cover;
         $this->writeCoverFile($coverPath);
 
-        $service = new BookService(new BookRepository(), $this->failingSubscribeService());
+        $service = new BookService(new BookRepository(), new AuthorBookRepository());
         $service->delete($book->book_id);
 
         $this->assertFalse(Book::find()->where(['book_id' => $book->book_id])->exists());
@@ -251,18 +258,15 @@ class CatalogTest extends Unit
         return $book;
     }
 
-    private function failingSubscribeService(): SubscribeService
+    private function attachFailingEventHandler(): void
     {
-        return new class(new SubscribeRepository(), $this->recordingSmsSender()) extends SubscribeService {
-            public int $notifyCalls = 0;
-
-            public function notify(array $ids, Book $book): void
-            {
-                $this->notifyCalls++;
-
+        Event::on(
+            Book::class,
+            Book::EVENT_AFTER_CREATE,
+            function () {
                 throw new \RuntimeException('SMS provider is unavailable.');
-            }
-        };
+            },
+        );
     }
 
     private function recordingSmsSender(): SmsSenderInterface
@@ -288,7 +292,7 @@ class CatalogTest extends Unit
     {
         $dir = dirname($path);
         if (!is_dir($dir)) {
-            mkdir($dir, 0777, true);
+            mkdir($dir, 0755, true);
         }
 
         file_put_contents(

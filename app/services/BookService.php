@@ -5,15 +5,18 @@ namespace app\services;
 use Yii;
 use app\models\Book;
 use app\repositories\BookRepository;
+use app\repositories\AuthorBookRepository;
+use app\events\BookEvent;
 use yii\db\Exception;
-use app\models\AuthorBook;
 use yii\helpers\FileHelper;
 use yii\web\UploadedFile;
 
 class BookService
 {
-    public function __construct(private BookRepository $repository, private SubscribeService $subscribeService)
-    {
+    public function __construct(
+        private BookRepository $repository,
+        private AuthorBookRepository $authorBookRepository,
+    ) {
     }
 
     public function create(Book $model): void
@@ -29,7 +32,7 @@ class BookService
                 throw new Exception('Ошибка при создании книги: ' . implode(', ', $model->getFirstErrors()));
             }
 
-            $authorsToNotify = $this->saveAuthorBooks($model);
+            $authorsToNotify = $this->authorBookRepository->syncAuthors($model);
 
             $transaction->commit();
         } catch (\Exception $e) {
@@ -38,7 +41,11 @@ class BookService
             throw $e;
         }
 
-        $this->notifySubscribers($authorsToNotify, $model);
+        try {
+            $model->trigger(Book::EVENT_AFTER_CREATE, new BookEvent($model, $authorsToNotify));
+        } catch (\Throwable $e) {
+            Yii::warning($e->getMessage(), __METHOD__);
+        }
     }
 
     public function update(Book $model): void
@@ -54,7 +61,7 @@ class BookService
                 throw new Exception('Ошибка при обновлении книги: ' . implode(', ', $model->getFirstErrors()));
             }
 
-            $this->saveAuthorBooks($model);
+            $this->authorBookRepository->syncAuthors($model);
 
             $transaction->commit();
         } catch (\Exception $e) {
@@ -84,10 +91,6 @@ class BookService
         return $this->repository->findById($id, true);
     }
 
-    /**
-     * @param Book $model
-     * @throws Exception
-     */
     private function uploadCoverFile(Book $model): ?string
     {
         $model->cover_file = UploadedFile::getInstance($model, 'cover_file');
@@ -136,45 +139,6 @@ class BookService
         $path = Yii::getAlias('@covers') . '/' . basename($fileName);
         if (is_file($path)) {
             @unlink($path);
-        }
-    }
-
-    private function saveAuthorBooks(Book $model): array
-    {
-        $currentAuthorIds = AuthorBook::find()
-            ->select('author_id')
-            ->where(['book_id' => $model->book_id])
-            ->column();
-
-        $newAuthorIds = $model->author_ids;
-
-        $authorsToAdd    = array_diff($newAuthorIds, $currentAuthorIds);
-        $authorsToRemove = array_diff($currentAuthorIds, $newAuthorIds);
-
-        if (!empty($authorsToRemove)) {
-            AuthorBook::deleteAll([
-                'book_id'   => $model->book_id,
-                'author_id' => $authorsToRemove,
-            ]);
-        }
-        foreach ($authorsToAdd as $authorId) {
-            $authorBook = new AuthorBook();
-            $authorBook->book_id = $model->book_id;
-            $authorBook->author_id = $authorId;
-            if (!$authorBook->save()) {
-                throw new Exception('Ошибка при сохранении связи между книгой и автором: ' . implode(', ', $authorBook->getFirstErrors()));
-            }
-        }
-
-        return $authorsToAdd;
-    }
-
-    private function notifySubscribers(array $authorIds, Book $book): void
-    {
-        try {
-            $this->subscribeService->notify($authorIds, $book);
-        } catch (\Throwable $e) {
-            Yii::warning($e->getMessage(), __METHOD__);
         }
     }
 }

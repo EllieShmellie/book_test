@@ -6,6 +6,8 @@ parameters:
         - services
         - repositories
         - components
+        - events
+        - bootstrap
     excludePaths:
         - models/*Search.php
     universalObjectCratesClasses:
@@ -15,6 +17,6 @@ parameters:
     treatPhpDocTypesAsCertain: false
     ignoreErrors:
         - '#Call to static method (getAlias|warning|error|info|debug|createObject)\(\) on an unknown class Yii\.#'
-        - '#Access to static property \$app on an unknown class Yii\.#'
+        - '#Access to static property \$(app|container) on an unknown class Yii\.#'
         - '#Instantiated class app\\models\\(Author|Book)Search not found\.#'
         - '#Call to method search\(\) on an unknown class app\\models\\(Author|Book)Search\.#'

@@ -6,6 +6,7 @@ use app\components\SmsSenderInterface;
 use app\repositories\SubscribeRepository;
 use app\models\Subscriber;
 use app\models\Book;
+use app\events\BookEvent;
 use Yii;
 
 class SubscribeService
@@ -56,5 +57,10 @@ class SubscribeService
         }
 
         $this->smsSender->sendBatch($messages);
+    }
+
+    public function handleBookCreated(BookEvent $event): void
+    {
+        $this->notify($event->authorIds, $event->book);
     }
 }
