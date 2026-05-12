@@ -14,7 +14,7 @@ class BookRepository
      * @throws NotFoundHttpException
      * @return Book
      */
-    public function findById(int $id, $withAuthors = false): Book
+    public function findById(int $id, bool $withAuthors = false): Book
     {
         $query = Book::find();
         if ($withAuthors) {
@@ -29,7 +29,7 @@ class BookRepository
     
     /**
      * Summary of findAll
-     * @return Book[]|null
+     * @return Book[]
      */
     public function findAll(): array
     {

@@ -19,7 +19,6 @@ class SignupForm extends Model
         return [
             [['phone', 'password', 'password_repeat'], 'required'],
             [['phone'], PhoneInputValidator::class, 'region' => ['RU']],
-            ['phone', 'match', 'pattern' => '/^\+?\d{10,15}$/', 'message' => 'Введите корректный номер телефона.'],
             ['password', 'string', 'min' => 6],
             ['password_repeat', 'compare', 'compareAttribute' => 'password', 'message' => 'Пароли не совпадают.'],
         ];

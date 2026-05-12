@@ -21,7 +21,7 @@ class BookController extends Controller
         return [
             'access' => [
                 'class' => AccessControl::class,
-                'only'  => ['index', 'view', 'subscribe', 'create', 'update', 'delete'],
+                'only'  => ['index', 'view', 'create', 'update', 'delete'],
                 'rules' => [
                     [
                         'actions' => ['index', 'view'],
@@ -65,7 +65,7 @@ class BookController extends Controller
         ]);
     }
 
-    public function actionView($id)
+    public function actionView($id): string
     {
         $model = $this->service->findModel($id);
         
@@ -84,7 +84,8 @@ class BookController extends Controller
                 $this->service->create($model);
                 return $this->redirect(['view', 'id' => $model->book_id]);
             } catch (\Exception $e) {
-                Yii::$app->session->setFlash('error', $e->getMessage());
+                Yii::error($e->getMessage(), __METHOD__);
+                Yii::$app->session->setFlash('error', 'Произошла ошибка при сохранении книги.');
             }
         }
         
@@ -94,7 +95,7 @@ class BookController extends Controller
         ]);
     }
 
-    public function actionUpdate($id): Response|string
+    public function actionUpdate(int $id): Response|string
     {
         $model = $this->service->findModel($id);
         $authors = $this->authorService->getAuthors();
@@ -104,7 +105,8 @@ class BookController extends Controller
                 $this->service->update($model);
                 return $this->redirect(['view', 'id' => $model->book_id]);
             } catch (\Exception $e) {
-                Yii::$app->session->setFlash('error', $e->getMessage());
+                Yii::error($e->getMessage(), __METHOD__);
+                Yii::$app->session->setFlash('error', 'Произошла ошибка при обновлении книги.');
             }
         }
         
@@ -114,12 +116,13 @@ class BookController extends Controller
         ]);
     }
 
-    public function actionDelete($id): Response
+    public function actionDelete(int $id): Response
     {
         try {
             $this->service->delete($id);
         } catch (\Exception $e) {
-            Yii::$app->session->setFlash('error', $e->getMessage());
+            Yii::error($e->getMessage(), __METHOD__);
+            Yii::$app->session->setFlash('error', 'Произошла ошибка при удалении книги.');
         }
         
         return $this->redirect(['index']);

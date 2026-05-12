@@ -80,7 +80,8 @@ class SiteController extends Controller
                 Yii::$app->user->login($user);
                 return $this->goHome();
             } catch (\Exception $e) {
-                Yii::$app->session->setFlash('error', $e->getMessage());
+                Yii::error($e->getMessage(), __METHOD__);
+                Yii::$app->session->setFlash('error', 'Произошла ошибка при регистрации.');
             }
         }
 
@@ -100,7 +101,8 @@ class SiteController extends Controller
                 Yii::$app->user->login($user, $model->rememberMe ? 3600 * 24 * 30 : 0);
                 return $this->goBack();
             } catch (\Exception $e) {
-                Yii::$app->session->setFlash('error', $e->getMessage());
+                Yii::error($e->getMessage(), __METHOD__);
+                Yii::$app->session->setFlash('error', 'Произошла ошибка при входе.');
             }
         }
         return $this->render('login', ['model' => $model]);

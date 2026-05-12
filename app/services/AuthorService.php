@@ -27,7 +27,7 @@ class AuthorService
         }
     }
 
-    public function delete($id): void
+    public function delete(int $id): void
     {
         $model = $this->repository->findById($id);
         if (!$model->delete()) {
@@ -39,7 +39,7 @@ class AuthorService
      * @param int $id
      * @return Author
      */
-    public function findModel($id): Author
+    public function findModel(int $id): Author
     {
         if (($model = $this->repository->findById($id)) !== null) {
             return $model;

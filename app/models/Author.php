@@ -26,7 +26,7 @@ class Author extends ActiveRecord
     /**
      * @var int[]
      */
-    public $book_ids = [];
+    public array $book_ids = [];
 
     /**
      * @inheritDoc

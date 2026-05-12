@@ -70,7 +70,7 @@ class AuthorController extends Controller
         ]);
     }
 
-    public function actionView($id): string
+    public function actionView(int $id): string
     {
         $model = $this->findModel($id);
         
@@ -88,7 +88,8 @@ class AuthorController extends Controller
                 $this->service->create($model);
                 return $this->redirect(['view', 'id' => $model->author_id]);
             } catch (\Exception $e) {
-                Yii::$app->session->setFlash('error', $e->getMessage());
+                Yii::error($e->getMessage(), __METHOD__);
+                Yii::$app->session->setFlash('error', 'Произошла ошибка при сохранении автора.');
             }
         }
         
@@ -97,7 +98,7 @@ class AuthorController extends Controller
         ]);
     }
 
-    public function actionUpdate($id): Response|string
+    public function actionUpdate(int $id): Response|string
     {
         $model = $this->findModel($id);
         
@@ -106,7 +107,8 @@ class AuthorController extends Controller
                 $this->service->update($model);
                 return $this->redirect(['view', 'id' => $model->author_id]);
             } catch (\Exception $e) {
-                Yii::$app->session->setFlash('error', $e->getMessage());
+                Yii::error($e->getMessage(), __METHOD__);
+                Yii::$app->session->setFlash('error', 'Произошла ошибка при обновлении автора.');
             }
         }
         
@@ -115,18 +117,19 @@ class AuthorController extends Controller
         ]);
     }
 
-    public function actionDelete($id): Response
+    public function actionDelete(int $id): Response
     {
         try {
             $this->service->delete($id);
         } catch (\Exception $e) {
-            Yii::$app->session->setFlash('error', $e->getMessage());
+            Yii::error($e->getMessage(), __METHOD__);
+            Yii::$app->session->setFlash('error', 'Произошла ошибка при удалении автора.');
         }
         
         return $this->redirect(['index']);
     }
 
-    protected function findModel($id): Author
+    protected function findModel(int $id): Author
     {
         if (($model = $this->service->findModel($id)) !== null) {
             return $model;
@@ -134,7 +137,7 @@ class AuthorController extends Controller
         throw new NotFoundHttpException('Запрошенный автор не найден.');
     }
 
-    public function actionSubscribe($id)
+    public function actionSubscribe(int $id)
     {
         $author = $this->findModel($id);
 
@@ -157,7 +160,8 @@ class AuthorController extends Controller
                 Yii::$app->session->setFlash('success', 'Вы успешно подписались на обновления автора ' . $author->last_name);
                 return $this->redirect(['view', 'id' => $author->author_id]);
             } catch (\Exception $e) {
-                Yii::$app->session->setFlash('error', $e->getMessage());
+                Yii::error($e->getMessage(), __METHOD__);
+                Yii::$app->session->setFlash('error', 'Произошла ошибка при создании подписки.');
             }
         }
 

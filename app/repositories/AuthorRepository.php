@@ -7,7 +7,7 @@ use yii\web\NotFoundHttpException;
 
 class AuthorRepository
 {
-    public function findById($id): Author
+    public function findById(int $id): Author
     {
         if (($model = Author::findOne($id)) !== null) {
             return $model;
@@ -30,7 +30,8 @@ class AuthorRepository
         return Author::find()
             ->alias('a')
             ->select(['a.*', 'COUNT(b.book_id) AS booksCount'])
-            ->joinWith(['books b'])
+            ->innerJoin(['ab' => 'author_book'], 'ab.author_id = a.author_id')
+            ->innerJoin(['b' => 'book'], 'b.book_id = ab.book_id')
             ->andWhere(['b.year' => $year])
             ->groupBy('a.author_id')
             ->orderBy(['booksCount' => SORT_DESC])

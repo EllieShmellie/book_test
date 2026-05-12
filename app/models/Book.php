@@ -28,7 +28,7 @@ class Book extends ActiveRecord
     /**
      * @var int[]
      */
-    public $author_ids = [];
+    public array $author_ids = [];
 
     /**
      * @var UploadedFile|null Загруженный файл обложки

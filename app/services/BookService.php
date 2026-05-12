@@ -68,7 +68,7 @@ class BookService
         }
     }
 
-    public function delete($id): void
+    public function delete(int $id): void
     {
         $model = $this->repository->findById($id);
         $cover = $model->cover;
@@ -79,7 +79,7 @@ class BookService
         $this->deleteCoverFile($cover);
     }
 
-    public function findModel($id): Book
+    public function findModel(int $id): Book
     {
         return $this->repository->findById($id, true);
     }
@@ -139,7 +139,7 @@ class BookService
         }
     }
 
-    protected function saveAuthorBooks(Book $model): array
+    private function saveAuthorBooks(Book $model): array
     {
         $currentAuthorIds = AuthorBook::find()
             ->select('author_id')

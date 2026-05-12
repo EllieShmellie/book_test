@@ -34,7 +34,7 @@ class AuthorSearch extends Author
      */
     public function search($params): ActiveDataProvider
     {
-        $query = Author::find()->distinct();
+        $query = Author::find()->distinct()->with('books');
 
         $query->joinWith(['authorBooks' => function ($q) {
             $q->alias('ab');

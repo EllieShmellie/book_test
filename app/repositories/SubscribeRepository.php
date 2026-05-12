@@ -39,6 +39,6 @@ class SubscribeRepository
      */
     public function findSubscribersByAuthors(array $authorIds): array
     {
-        return Subscriber::find()->where(['author_id' => $authorIds])->all();
+        return Subscriber::find()->where(['author_id' => $authorIds])->with('author')->all();
     }
 }
