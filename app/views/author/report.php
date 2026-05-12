@@ -26,21 +26,25 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
 <?= Html::endForm() ?>
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>Автор</th>
-            <th>Количество книг</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php foreach ($authors as $index => $author): ?>
+<?php if (empty($authors)): ?>
+    <p class="text-muted">За выбранный год данных нет.</p>
+<?php else: ?>
+    <table class="table table-striped">
+        <thead>
             <tr>
-                <td><?= $index + 1 ?></td>
-                <td><?= Html::encode($author->first_name . ' ' . $author->last_name) ?></td>
-                <td><?= (int) $author->booksCount ?></td>
+                <th>#</th>
+                <th>Автор</th>
+                <th>Количество книг</th>
             </tr>
-        <?php endforeach; ?>
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            <?php foreach ($authors as $index => $author): ?>
+                <tr>
+                    <td><?= $index + 1 ?></td>
+                    <td><?= Html::encode($author->getFullName()) ?></td>
+                    <td><?= (int) $author->booksCount ?></td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+<?php endif; ?>

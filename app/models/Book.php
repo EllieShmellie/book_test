@@ -60,6 +60,8 @@ class Book extends ActiveRecord
             [['title', 'description'], 'string'],
             [['cover'], 'string', 'max' => 255],
             [['isbn'], 'string', 'max' => 13],
+            [['isbn'], 'match', 'pattern' => '/^\d{10}(\d{3})?$/'],
+            [['isbn'], 'unique'],
             [['created_at', 'updated_at'], 'safe'],
             ['author_ids', 'each', 'rule' => [
                 'exist',

@@ -10,11 +10,11 @@
     },
     "minimum-stability": "dev",
     "require": {
-        "php": ">=7.4.0",
+        "php": ">=8.0.0",
         "yiisoft/yii2": "~2.0.45",
         "yiisoft/yii2-bootstrap5": "~2.0.2",
         "yiisoft/yii2-symfonymailer": "~2.0.3",
-        "borales/yii2-phone-input": "*"
+        "borales/yii2-phone-input": "^0.3.0"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",

@@ -36,7 +36,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.0'
+          php-version: '8.2'
           extensions: curl, gd, intl, mbstring, pdo_mysql, zip
           coverage: none
 
@@ -72,4 +72,4 @@ jobs:
 
       - name: Run tests
         working-directory: app
-        run: vendor/bin/codecept run unit
+        run: vendor/bin/codecept run unit,functional

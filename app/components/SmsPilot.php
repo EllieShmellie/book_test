@@ -8,7 +8,7 @@ use yii\helpers\Json;
 use Yii;
 use yii\web\HttpException;
 
-class SmsPilot extends Component
+class SmsPilot extends Component implements SmsSenderInterface
 {
     public string $apiKey;
     public string $apiUrl = 'https://smspilot.ru/api2.php';

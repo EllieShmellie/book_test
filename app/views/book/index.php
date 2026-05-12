@@ -22,9 +22,28 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel'  => $searchModel,
+        'emptyText'    => 'Книги не найдены.',
         'columns'      => [
             ['class' => 'yii\grid\SerialColumn'],
             'book_id',
+            [
+                'attribute' => 'cover',
+                'format'    => 'html',
+                'value'     => static function ($model) {
+                    if (!$model->cover) {
+                        return null;
+                    }
+
+                    return Html::img(
+                        Yii::getAlias('@coversUrl') . '/' . $model->cover,
+                        [
+                            'alt' => $model->title,
+                            'style' => 'max-width: 64px; max-height: 88px;',
+                        ]
+                    );
+                },
+                'filter'    => false,
+            ],
             'title',
             'year',
             'isbn',

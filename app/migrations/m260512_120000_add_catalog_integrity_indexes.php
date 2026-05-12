@@ -13,6 +13,13 @@ class m260512_120000_add_catalog_integrity_indexes extends Migration
         );
 
         $this->createIndex(
+            '{{%idx-book-isbn}}',
+            '{{%book}}',
+            'isbn',
+            true
+        );
+
+        $this->createIndex(
             '{{%idx-subscriber-author_id}}',
             '{{%subscriber}}',
             'author_id'
@@ -32,6 +39,7 @@ class m260512_120000_add_catalog_integrity_indexes extends Migration
     {
         $this->dropForeignKey('{{%fk-subscriber-author_id}}', '{{%subscriber}}');
         $this->dropIndex('{{%idx-subscriber-author_id}}', '{{%subscriber}}');
+        $this->dropIndex('{{%idx-book-isbn}}', '{{%book}}');
         $this->dropIndex('{{%idx-book-year}}', '{{%book}}');
     }
 }

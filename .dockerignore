@@ -1,0 +1,9 @@
+.git
+.github
+
+app/vendor
+app/runtime
+app/web/assets
+app/tests/_output
+
+*.log
