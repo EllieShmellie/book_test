@@ -7,6 +7,7 @@ $config = [
     'id' => 'basic',
     'name' => 'Book Catalog',
     'homeUrl' => '/author/index',
+    'defaultRoute' => 'author/index',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'aliases' => [
