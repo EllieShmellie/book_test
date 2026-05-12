@@ -12,7 +12,7 @@ class m250304_181723_create_author_table extends Migration
     {
         $this->createTable($this->table, [
             'author_id'  => $this->primaryKey(),
-            'last_name'  => $this->string()->notNull(), 
+            'last_name'  => $this->string()->notNull(),
             'first_name' => $this->string()->notNull(),
             'patronymic' => $this->string(),
             'created_at'  => $this->timestamp()->notNull(),

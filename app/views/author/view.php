@@ -14,17 +14,19 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
     
     <p>
-         <?= Html::a('Изменить', ['update', 'id' => $model->author_id], ['class' => 'btn btn-primary']) ?>
-         <?= Html::a('Удалить', ['delete', 'id' => $model->author_id], [
-            'class' => 'btn btn-danger',
-            'data'  => [
-                'confirm' => 'Вы уверены, что хотите удалить этого автора?',
-                'method'  => 'post',
-            ],
-         ]) ?>
-         <?= Html::a('Подписаться на обновления', ['author/subscribe', 'id' => $model->author_id], [
-        'class' => 'btn btn-success',
-    ]) ?>
+        <?php if (!Yii::$app->user->isGuest): ?>
+            <?= Html::a('Изменить', ['update', 'id' => $model->author_id], ['class' => 'btn btn-primary']) ?>
+            <?= Html::a('Удалить', ['delete', 'id' => $model->author_id], [
+                'class' => 'btn btn-danger',
+                'data'  => [
+                    'confirm' => 'Вы уверены, что хотите удалить этого автора?',
+                    'method'  => 'post',
+                ],
+            ]) ?>
+        <?php endif; ?>
+        <?= Html::a('Подписаться на обновления', ['author/subscribe', 'id' => $model->author_id], [
+            'class' => 'btn btn-success',
+        ]) ?>
     </p>
     
     <?= DetailView::widget([
@@ -39,8 +41,8 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'books',
                 'label'     => 'Книги',
-                'value'     => function($model) {
-                    return implode(', ', array_map(function($book) {
+                'value'     => function ($model) {
+                    return implode(', ', array_map(function ($book) {
                         return $book->title;
                     }, $model->books));
                 },

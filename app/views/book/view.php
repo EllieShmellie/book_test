@@ -4,7 +4,6 @@
 
 use yii\widgets\DetailView;
 use yii\helpers\Html;
-use yii\helpers\ArrayHelper;
 
 $this->title = $model->title;
 $this->params['breadcrumbs'][] = ['label' => 'Книги', 'url' => ['index']];
@@ -14,16 +13,18 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
     
-    <p>
-        <?= Html::a('Изменить', ['update', 'id' => $model->book_id], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('Удалить', ['delete', 'id' => $model->book_id], [
-            'class' => 'btn btn-danger',
-            'data'  => [
-                'confirm' => 'Вы уверены, что хотите удалить эту книгу?',
-                'method'  => 'post',
-            ],
-        ]) ?>
-    </p>
+    <?php if (!Yii::$app->user->isGuest): ?>
+        <p>
+            <?= Html::a('Изменить', ['update', 'id' => $model->book_id], ['class' => 'btn btn-primary']) ?>
+            <?= Html::a('Удалить', ['delete', 'id' => $model->book_id], [
+                'class' => 'btn btn-danger',
+                'data'  => [
+                    'confirm' => 'Вы уверены, что хотите удалить эту книгу?',
+                    'method'  => 'post',
+                ],
+            ]) ?>
+        </p>
+    <?php endif; ?>
     
     <?= DetailView::widget([
         'model'      => $model,
@@ -36,12 +37,12 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'cover',
                 'format' => 'html',
-                'value' => function($model) {
+                'value' => function ($model) {
                     if (!$model->cover) {
                         return 'Нет изображения';
                     }
                     return Html::img(
-                        Yii::getAlias('@coversUrl') . '/' . $model->cover, 
+                        Yii::getAlias('@coversUrl') . '/' . $model->cover,
                         ['width' => '150', 'alt' => $model->title]
                     );
                 },
@@ -51,8 +52,11 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'authors',
                 'label'     => 'Авторы',
-                'value'     => function($model) {
-                    return implode(', ', ArrayHelper::getColumn($model->authors, 'last_name'));
+                'value'     => function ($model) {
+                    return implode(', ', array_map(
+                        static fn ($author) => $author->getFullName(),
+                        $model->authors
+                    ));
                 },
             ],
         ],

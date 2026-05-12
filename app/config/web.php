@@ -16,7 +16,7 @@ $config = [
     'components' => [
         'smsPilot' => [
             'class' => 'app\components\SmsPilot',
-            'apiKey' => $params['smsPilotApiKey'], 
+            'apiKey' => $params['smsPilotApiKey'],
         ],
         'request' => [
             'cookieValidationKey' => 'yL5fRLYzkVeL_7h0CumcJ5Xp2Rvt5j09',

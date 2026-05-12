@@ -13,9 +13,11 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
     
-    <p>
-        <?= Html::a('Создать автора', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
+    <?php if (!Yii::$app->user->isGuest): ?>
+        <p>
+            <?= Html::a('Создать автора', ['create'], ['class' => 'btn btn-success']) ?>
+        </p>
+    <?php endif; ?>
     
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -30,8 +32,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'books',
                 'label'     => 'Книги',
                 'format'    => 'raw',
-                'value'     => function($model) {
-                    return implode(', ', array_map(function($book) {
+                'value'     => function ($model) {
+                    return implode(', ', array_map(function ($book) {
                         return $book->title;
                     }, $model->books));
                 },
@@ -45,8 +47,12 @@ $this->params['breadcrumbs'][] = $this->title;
                             '&#128276;',
                             ['subscribe', 'id' => $model->author_id],
                             ['title' => 'Подписаться', 'data-pjax' => '0']
-                        );                        
+                        );
                     },
+                ],
+                'visibleButtons' => [
+                    'update' => !Yii::$app->user->isGuest,
+                    'delete' => !Yii::$app->user->isGuest,
                 ],
             ],
         ],

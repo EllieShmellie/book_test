@@ -17,7 +17,7 @@ class m250306_123558_create_user_table extends Migration
             'updated_at'    => $this->timestamp()->notNull(),
         ]);
     }
-    
+
     public function safeDown(): void
     {
         $this->dropTable($this->table);

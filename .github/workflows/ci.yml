@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MARIADB_DATABASE: book_test_test
+          MARIADB_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      TEST_DB_HOST: 127.0.0.1
+      TEST_DB_NAME: book_test_test
+      TEST_DB_USER: root
+      TEST_DB_PASSWORD: root
+      SMS_PILOT_API_KEY: эмулятор
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.0'
+          extensions: curl, gd, intl, mbstring, pdo_mysql, zip
+          coverage: none
+
+      - name: Validate Composer config
+        working-directory: app
+        run: composer validate --no-check-lock
+
+      - name: Install dependencies
+        working-directory: app
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Lint PHP files
+        working-directory: app
+        run: |
+          find . \
+            -path './vendor' -prune -o \
+            -path './runtime' -prune -o \
+            -path './web/assets' -prune -o \
+            -name '*.php' -print0 \
+            | xargs -0 -n1 php -l
+
+      - name: Validate Docker Compose config
+        working-directory: .
+        run: docker compose config
+
+      - name: Run migrations
+        working-directory: app
+        run: php tests/bin/yii migrate --interactive=0
+
+      - name: Build test actors
+        working-directory: app
+        run: vendor/bin/codecept build
+
+      - name: Run tests
+        working-directory: app
+        run: vendor/bin/codecept run unit

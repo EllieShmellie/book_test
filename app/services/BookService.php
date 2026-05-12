@@ -11,29 +11,31 @@ use yii\web\UploadedFile;
 
 class BookService
 {
-
     public function __construct(private BookRepository $repository, private SubscribeService $subscribeService)
     {
-
     }
 
     public function create(Book $model): void
     {
         $transaction = Yii::$app->db->beginTransaction();
+        $authorsToNotify = [];
+
         try {
             $this->uploadCoverFile($model);
 
             if (!$model->save(false)) {
                 throw new Exception('Ошибка при создании книги: ' . implode(', ', $model->getFirstErrors()));
             }
-            
-            $this->saveAuthorBooks($model);
-            
+
+            $authorsToNotify = $this->saveAuthorBooks($model);
+
             $transaction->commit();
         } catch (\Exception $e) {
             $transaction->rollBack();
             throw $e;
         }
+
+        $this->notifySubscribers($authorsToNotify, $model);
     }
 
     public function update(Book $model): void
@@ -45,15 +47,14 @@ class BookService
             if (!$model->save(false)) {
                 throw new Exception('Ошибка при обновлении книги: ' . implode(', ', $model->getFirstErrors()));
             }
-            
+
             $this->saveAuthorBooks($model);
-            
+
             $transaction->commit();
         } catch (\Exception $e) {
             $transaction->rollBack();
             throw $e;
         }
-
     }
 
     public function delete($id): void
@@ -90,8 +91,7 @@ class BookService
         }
     }
 
-
-    protected function saveAuthorBooks(Book $model): void
+    protected function saveAuthorBooks(Book $model): array
     {
         $currentAuthorIds = AuthorBook::find()
             ->select('author_id')
@@ -117,6 +117,16 @@ class BookService
                 throw new Exception('Ошибка при сохранении связи между книгой и автором: ' . implode(', ', $authorBook->getFirstErrors()));
             }
         }
-        $this->subscribeService->notify($authorsToAdd, $model);
+
+        return $authorsToAdd;
+    }
+
+    private function notifySubscribers(array $authorIds, Book $book): void
+    {
+        try {
+            $this->subscribeService->notify($authorIds, $book);
+        } catch (\Throwable $e) {
+            Yii::warning($e->getMessage(), __METHOD__);
+        }
     }
 }

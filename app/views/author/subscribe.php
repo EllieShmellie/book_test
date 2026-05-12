@@ -23,7 +23,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'jsOptions' => [
                 'preferredCountries' => ['ru'],
             ]
-        ]); 
+        ]);
     ?>
     
     <div class="form-group">

@@ -5,7 +5,6 @@
 
 use yii\grid\GridView;
 use yii\helpers\Html;
-use yii\helpers\ArrayHelper;
 
 $this->title = 'Книги';
 $this->params['breadcrumbs'][] = $this->title;
@@ -14,9 +13,11 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
     
-    <p>
-        <?= Html::a('Создать книгу', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
+    <?php if (!Yii::$app->user->isGuest): ?>
+        <p>
+            <?= Html::a('Создать книгу', ['create'], ['class' => 'btn btn-success']) ?>
+        </p>
+    <?php endif; ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -30,12 +31,21 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'author_ids',
                 'label'     => 'Авторы',
-                'value'     => function($model) {
-                    return implode(', ', ArrayHelper::getColumn($model->authors, 'last_name'));
+                'value'     => function ($model) {
+                    return implode(', ', array_map(
+                        static fn ($author) => $author->getFullName(),
+                        $model->authors
+                    ));
                 },
                 'filter'    => false,
             ],
-            ['class' => 'yii\grid\ActionColumn'],
+            [
+                'class' => 'yii\grid\ActionColumn',
+                'visibleButtons' => [
+                    'update' => !Yii::$app->user->isGuest,
+                    'delete' => !Yii::$app->user->isGuest,
+                ],
+            ],
         ],
     ]); ?>
     

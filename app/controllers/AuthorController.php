@@ -168,10 +168,10 @@ class AuthorController extends Controller
 
     public function actionReport($year = null): string
     {
-        $year = $year ?: date('Y');
+        $year = (int) ($year ?: date('Y'));
 
         $authors = $this->service->getTopAuthors($year, self::REPORT_LIMIT);
-    
+
         return $this->render('report', [
             'authors' => $authors,
             'year'    => $year,

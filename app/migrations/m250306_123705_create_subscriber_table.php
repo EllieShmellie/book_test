@@ -13,13 +13,13 @@ class m250306_123705_create_subscriber_table extends Migration
             'author_id'      => $this->integer()->notNull(),
         ]);
         $this->createIndex(
-            'idx-unique-phone-author_id', 
-            $this->table, 
-            ['phone', 'author_id'], 
+            'idx-unique-phone-author_id',
+            $this->table,
+            ['phone', 'author_id'],
             true
         );
     }
-    
+
     public function safeDown(): void
     {
         $this->dropTable($this->table);
